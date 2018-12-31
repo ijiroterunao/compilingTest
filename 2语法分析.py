@@ -257,29 +257,29 @@ def Var_Define():  # <标识符>→<字母>{<字母>|<数字>}
         return False
 
 
-def Statement():  # <语句>→<赋值语句>|<条件语句>|<当循环语句>|<复合语句>|ε
+def Stmt():  # <语句>→<赋值语句>|<条件语句>|<当循环语句>|<复合语句>|ε
     global syntax
     if syntax == 10:  # 标识符<赋值语句>
-        Assignment_statement()
+        Assignment_Stmt()
         return True
 
     elif syntax == 2:  # if<条件语句>
-        Conditional_statements()
+        Conditional_Stmts()
         return True
 
     elif syntax == 5:  # while<当循环语句>
-        While_Statement()
+        While_Stmt()
         return True
 
     elif syntax == 1:  # begin<复合语句>
-        Compound_statements()
+        Compound_Stmts()
         return True
 
     else:
         return False
 
 
-def Assignment_statement():  # <赋值语句>→<标识符>＝<表达式>;
+def Assignment_Stmt():  # <赋值语句>→<标识符>＝<表达式>;
     global p, m, token, ch, syntax, sum, offset
     printOffset()
     print("<赋值语句>")
@@ -299,7 +299,7 @@ def Assignment_statement():  # <赋值语句>→<标识符>＝<表达式>;
         print("缺少等号 =")
 
 
-def Conditional_statements():#<条件语句>→if <条件> then <语句>| if <条件> then <语句> else<语句>
+def Conditional_Stmts():#<条件语句>→if <条件> then <语句>| if <条件> then <语句> else<语句>
     global p, m, token, ch, syntax, sum, offset
     if syntax == 2 : #"if"
         printOffset()
@@ -310,10 +310,10 @@ def Conditional_statements():#<条件语句>→if <条件> then <语句>| if <�
             printOffset()
             print("条件语句 then")
             lexer()
-            Statement()
+            Stmt()
             if syntax ==4 : #"else"
                 lexer()
-                Statement()
+                Stmt()
             else:
                 return True
         else:
@@ -323,7 +323,7 @@ def Conditional_statements():#<条件语句>→if <条件> then <语句>| if <�
         return False
 
 
-def While_Statement(): #<当循环语句>→while <条件> do <语句>
+def While_Stmt(): #<当循环语句>→while <条件> do <语句>
     global p, m, token, ch, syntax, sum, offset
     printOffset()
     print("<当循环语句>",token)
@@ -333,19 +333,19 @@ def While_Statement(): #<当循环语句>→while <条件> do <语句>
         printOffset()
         print("while循环的do")
         lexer()
-        Statement()
+        Stmt()
         return True
     else:
         return False
 
-def Compound_statements():#<复合语句>→begin <语句>{；<语句>} end
+def Compound_Stmts():#<复合语句>→begin <语句>{；<语句>} end
     global p, m, token, ch, syntax, sum, offset
     printOffset()
     print("<复合语句>",token)
     offset +=4
     lexer()
     while True:
-        if Statement()==False:
+        if Stmt()==False:
             break
         if syntax == 23:    #  分号;
             printOffset()
@@ -379,13 +379,13 @@ def Expression():  # <表达式>→[＋|－]<项>{<加法运算符><项>}
     printOffset()
     print("<表达式>")
     offset += 4
-    Item_expression()# <项>
+    Item()# <项>
     while True:
         if syntax == 12 or syntax == 13:  # 12,+ 13,-
             printOffset()
             print("<加法运算符>", token)
             lexer()
-            Item_expression()  # <项>
+            Item()  # <项>
         else:
             break
 
@@ -393,7 +393,7 @@ def Expression():  # <表达式>→[＋|－]<项>{<加法运算符><项>}
     return True
 
 
-def Item_expression():  # <项>→<因子>{<乘法运算符><因子>}
+def Item():  # <项>→<因子>{<乘法运算符><因子>}
     global p, m, token, ch, syntax, sum, offset
     printOffset()
     print("<项>")
@@ -484,7 +484,7 @@ if __name__ == "__main__":
     Var_Description()
     while True:
         lexer()
-        Statement()
+        Stmt()
         if syntax == 0:
             print("#语法分析结束")
             break

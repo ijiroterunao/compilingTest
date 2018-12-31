@@ -34,13 +34,13 @@ def isNumber(ch):
 def isAlpha(ch):
     return (ch >= 'a' and ch <= 'z' or ch >= 'A' and ch <= 'Z')
 
-
+'''
 def Print(syn):
     if syn == 11:
         print(syn, sum, sep=",")
     else:
         print(syn, token, sep=",")
-
+'''
 
 def printOffset():
     global p, m, token, ch, syn, sum, offset, LL, nT, middle
@@ -280,29 +280,29 @@ def Var_Define():  # <标识符>→<字母>{<字母>|<数字>}
         return False
 
 
-def Statement():  # <语句>→<赋值语句>|<条件语句>|<当循环语句>|<复合语句>|ε
+def Stmt():  # <语句>→<赋值语句>|<条件语句>|<当循环语句>|<复合语句>|ε
     global program, p, m, token, ch, syn, sum, offset, LL, nT, middle
     if syn == 10:  # 标识符<赋值语句>
-        Assignment_statement()
+        Assignment_Stmt()
         return True
 
     elif syn == 2:  # if<条件语句>
-        Conditional_statements()
+        Conditional_Stmts()
         return True
 
     elif syn == 5:  # while<当循环语句>
-        While_Statement()
+        While_Stmt()
         return True
 
     elif syn == 1:  # begin<复合语句>
-        Compound_statements()
+        Compound_Stmts()
         return True
 
     else:
         return False
 
 
-def Assignment_statement():  # <赋值语句>→<标识符>＝<表达式>;
+def Assignment_Stmt():  # <赋值语句>→<标识符>＝<表达式>;
     global program, p, m, token, ch, syn, sum, offset, LL, nT, middle
     middle[LL] = middle[LL] + token
     printOffset()
@@ -326,7 +326,7 @@ def Assignment_statement():  # <赋值语句>→<标识符>＝<表达式>;
         print("缺少等号 =")
 
 
-def Conditional_statements():  # <条件语句>→if <条件> then <语句>| if <条件> then <语句> else<语句>
+def Conditional_Stmts():  # <条件语句>→if <条件> then <语句>| if <条件> then <语句> else<语句>
     global program, p, m, token, ch, syn, sum, offset, LL, nT, middle
     if syn == 2:  # "if"
         printOffset()
@@ -337,10 +337,10 @@ def Conditional_statements():  # <条件语句>→if <条件> then <语句>| if 
             printOffset()
             print("条件语句 then")
             lexer()
-            Statement()
+            Stmt()
             if syn == 4:  # "else"
                 lexer()
-                Statement()
+                Stmt()
             else:
                 return True
         else:
@@ -350,7 +350,7 @@ def Conditional_statements():  # <条件语句>→if <条件> then <语句>| if 
         return False
 
 
-def While_Statement():  # <当循环语句>→while <条件> do <语句>
+def While_Stmt():  # <当循环语句>→while <条件> do <语句>
     global program, p, m, token, ch, syn, sum, offset, LL, nT, middle
     printOffset()
     print("<当循环语句>", token)
@@ -360,20 +360,20 @@ def While_Statement():  # <当循环语句>→while <条件> do <语句>
         printOffset()
         print("while循环的do")
         lexer()
-        Statement()
+        Stmt()
         return True
     else:
         return False
 
 
-def Compound_statements():  # <复合语句>→begin <语句>{；<语句>} end
+def Compound_Stmts():  # <复合语句>→begin <语句>{；<语句>} end
     global program, p, m, token, ch, syn, sum, offset, LL, nT, middle
     printOffset()
     print("<复合语句>", token)
     offset += 4
     lexer()
     while True:
-        if Statement() == False:
+        if Stmt() == False:
             break
         if syn == 23:  # 分号;
             LL += 1
@@ -404,7 +404,7 @@ def Expression():  # <表达式>→[＋|－]<项>{<加法运算符><项>}
     printOffset()
     print("<表达式>")
     offset += 4
-    Item_expression()  # <项>
+    Item()  # <项>
     while True:
         if syn == 12 or syn == 13:  # 12,+ 13,-
             printOffset()
@@ -412,7 +412,7 @@ def Expression():  # <表达式>→[＋|－]<项>{<加法运算符><项>}
             middle[LL] = middle[LL] + " " + token + " "
             sult()
             lexer()
-            Item_expression()  # <项>
+            Item()  # <项>
         else:
             break
 
@@ -420,7 +420,7 @@ def Expression():  # <表达式>→[＋|－]<项>{<加法运算符><项>}
     return True
 
 
-def Item_expression():  # <项>→<因子>{<乘法运算符><因子>}
+def Item():  # <项>→<因子>{<乘法运算符><因子>}
     global program, p, m, token, ch, syn, sum, offset, LL, nT, middle
     printOffset()
     print("<项>")
@@ -518,23 +518,26 @@ if __name__ == "__main__":
     Var_Description()
     while True:
         lexer()
-        Statement()
+        Stmt()
         if syn == 0:
             print("退出 #")
             break
 
     sys.stdout = sysoutsave
-    # for m in middle:
-    #    print(m)
-    # print("end========================")
+
+    print("middle========================")
+    for m in middle:
+       print(m)
+    print("middle========================")
+    print("T1========================")
     T1 = []
     for j in middle:
         if j.__len__() > 1:
             T1.append(j)
 
-    # for m in T1:
-    #     print(m)
-    # print(len(T1), "end========================")
+    for m in T1:
+        print(m)
+    print("T1========================")
     # print(T1[4][0])
 
     T2 = []
@@ -562,6 +565,7 @@ if __name__ == "__main__":
 
             i = j - 1
         i += 1
-
+    print("中间代码结果========================")
     for m in T2:
         print(m)
+    print("中间代码结果========================")

@@ -19,7 +19,7 @@ def isAlpha(ch):
     return (ch >= 'a' and ch <= 'z' or ch >= 'A' and ch <= 'Z')
 
 
-def Print(syn):
+def PrintSyn(syn):
     if syn == 11:
         print(syn, sum, sep=",")
     else:
@@ -150,5 +150,5 @@ if __name__ == "__main__":
             print("success")
             break
         else:
-            Print(syn)
+            PrintSyn(syn)
 
