@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+import copy
 import os
 import sys
 
@@ -12,6 +13,29 @@ token = ""
 rwtab = ["begin", "if", "then", "else", "while", "do", "Const", "Var", "end"]
 offset = 0
 
+
+#常量表
+Const_list=[]
+#变量表
+Var_list=[]
+#结果表
+results=[]
+# for i in range(30):
+#     results.append("")
+#左值表
+left_list=[]
+#右值表
+middle = []
+#for i in range(10):
+    #a=[]
+    #for i in range(10):
+     #   a.append("")
+    #middle.append(a)
+LL = 0
+
+LR = 0
+nT = 0
+line_result=0
 
 def isNumber(ch):
     return (ch <= '9' and ch >= '0')
@@ -107,6 +131,7 @@ def lexer():
             if isNumber(ch) == False:
                 break
             sum = sum * 10 + int(ch)
+            token = str(sum)
             ch = program[p]
             p = p + 1
 
@@ -173,7 +198,7 @@ def lexer():
 
 
 def Const_Description():  # <常量说明>→Const <常量定义>{，<常量定义>}；
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle,Const_list
     lexer()
     if (syntax == 7):  # 7 "Const"
         printOffset()
@@ -200,21 +225,27 @@ def Const_Description():  # <常量说明>→Const <常量定义>{，<常量定�
 
 
 def Const_Define():  # <常量定义>→<标识符>＝<无符号整数>
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle,Const_list,line_result,LR
     if syntax == 10:
+        results.append([])
+        results[line_result] = token
         printOffset()
         print("<常量定义>")
         offset += 4
         printOffset()
+        Const_list.append(token)
         print(token)
         lexer()
         if syntax == 16:
+            results[line_result] = results[line_result] + " = "
             printOffset()
             print("等于", token)
             lexer()
             if (syntax == 11):
                 printOffset()
                 print("无符号整数", sum)
+                results[line_result] = results[line_result] + str(sum)
+                line_result+=1
                 offset -= 4
                 return True
             return False
@@ -223,7 +254,7 @@ def Const_Define():  # <常量定义>→<标识符>＝<无符号整数>
 
 
 def Var_Description():  # <变量说明>→Var <标识符>{，<标识符>}；
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle
     lexer()
     if syntax == 8:  # "Var"
         printOffset()
@@ -233,6 +264,7 @@ def Var_Description():  # <变量说明>→Var <标识符>{，<标识符>}；
         while True:
             if Var_Define() == False:
                 break
+            Var_list.append(token)
             lexer()
             if syntax == 23:  # 23 ;
                 printOffset()
@@ -248,8 +280,9 @@ def Var_Description():  # <变量说明>→Var <标识符>{，<标识符>}；
 
 
 def Var_Define():  # <标识符>→<字母>{<字母>|<数字>}
-    global syntax
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle,Var_list
     if syntax == 10:
+
         printOffset()
         print("<变量定义>", token)
         return True
@@ -258,8 +291,9 @@ def Var_Define():  # <标识符>→<字母>{<字母>|<数字>}
 
 
 def Stmt():  # <语句>→<赋值语句>|<条件语句>|<当循环语句>|<复合语句>|ε
-    global syntax
+    global p, m, token, ch, syn, sum, offset, LL, LR,nT, middle
     if syntax == 10:  # 标识符<赋值语句>
+        left_list.append(token)
         Assignment_Stmt()
         return True
 
@@ -280,14 +314,16 @@ def Stmt():  # <语句>→<赋值语句>|<条件语句>|<当循环语句>|<复�
 
 
 def Assignment_Stmt():  # <赋值语句>→<标识符>＝<表达式>;
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, LR,nT, middle
     printOffset()
     print("<赋值语句>")
     offset += 4
     printOffset()
     print("<标识符>", token)
-    lexer()
+
+    lexer() #识别赋值语句的等号
     if (syntax == 16):  # 等于号
+        middle.append([])
         printOffset()
         print("赋值语句的等于 =")
         offset += 4
@@ -300,7 +336,7 @@ def Assignment_Stmt():  # <赋值语句>→<标识符>＝<表达式>;
 
 
 def Conditional_Stmts():#<条件语句>→if <条件> then <语句>| if <条件> then <语句> else<语句>
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle
     if syntax == 2 : #"if"
         printOffset()
         print("条件语句 if")
@@ -324,7 +360,7 @@ def Conditional_Stmts():#<条件语句>→if <条件> then <语句>| if <条件>
 
 
 def While_Stmt(): #<当循环语句>→while <条件> do <语句>
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle
     printOffset()
     print("<当循环语句>",token)
     lexer()
@@ -339,7 +375,7 @@ def While_Stmt(): #<当循环语句>→while <条件> do <语句>
         return False
 
 def Compound_Stmts():#<复合语句>→begin <语句>{；<语句>} end
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle,LR
     printOffset()
     print("<复合语句>",token)
     offset +=4
@@ -349,6 +385,8 @@ def Compound_Stmts():#<复合语句>→begin <语句>{；<语句>} end
             break
         if syntax == 23:    #  分号;
             printOffset()
+            LL+=1
+            LR =0
             print("复合语句中的分割符",token)
             lexer()
             if syntax ==9:  # 结束"end"
@@ -375,19 +413,16 @@ def Compound_Stmts():#<复合语句>→begin <语句>{；<语句>} end
 
 
 def Expression():  # <表达式>→[＋|－]<项>{<加法运算符><项>}
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle
     printOffset()
     print("<表达式>")
     offset += 4
-    if syntax == 12 or syntax == 13:
-        printOffset()
-        print("<加法运算符>", token)
-        lexer()
     Item()# <项>
     while True:
         if syntax == 12 or syntax == 13:  # 12,+ 13,-
             printOffset()
             print("<加法运算符>", token)
+            middle[LL].append(token)
             lexer()
             Item()  # <项>
         else:
@@ -398,18 +433,23 @@ def Expression():  # <表达式>→[＋|－]<项>{<加法运算符><项>}
 
 
 def Item():  # <项>→<因子>{<乘法运算符><因子>}
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle,LR
     printOffset()
     print("<项>")
     offset += 4
+    middle[LL].append([])
+
     while True:
         if Factor() == False:
             break
         if syntax == 14 or syntax == 15:  # "*" "/"
             printOffset()
             print("<乘法运算符>", token)
+            middle[LL][-1].append(token)
+            #middle[LL][LR]=middle[LL][LR]+token
             lexer()
         else:
+            LR += 1
             offset -= 4
             return True
 
@@ -418,19 +458,21 @@ def Item():  # <项>→<因子>{<乘法运算符><因子>}
 
 
 def Factor():  # <因子>→<标识符> | <无符号整数> | ‘(’<表达式>‘)’
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL,LR, nT, middle
     printOffset()
     print("<因子>")
     offset += 4
     if syntax == 10:  # <标识符>
         printOffset()
         print("<标识符>", token)
+        middle[LL][-1].append(token)
         lexer()
         offset -= 4
         return True
     elif syntax == 11:  # <无符号整数>
         printOffset()
         print("<无符号整数> ", sum)
+        middle[LL][-1].append(token)
         lexer()
         offset -= 4
         return True
@@ -458,7 +500,7 @@ def Factor():  # <因子>→<标识符> | <无符号整数> | ‘(’<表达式>
     # return False
 
 def Condition(): #<条件>→<表达式><关系运算符><表达式>
-    global p, m, token, ch, syntax, sum, offset
+    global p, m, token, ch, syn, sum, offset, LL, nT, middle
     printOffset()
     print("<条件>")
     Expression()
@@ -474,7 +516,7 @@ def Condition(): #<条件>→<表达式><关系运算符><表达式>
 
 
 if __name__ == "__main__":
-    program = open('examplse.txt').read()
+    program = open('examplse2.txt').read()
     sys.stderr = open('err.log', 'w')
     sys.stdout = open('file_out.txt', 'w')
     print("源程序：")
@@ -492,3 +534,140 @@ if __name__ == "__main__":
         if syntax == 0:
             print("#语法分析结束")
             break
+
+    print("Const_list", Const_list)
+    print("Var_list", Var_list)
+    print("left_list", left_list)
+    print("middle")
+    for i in middle:
+        print(i)
+
+    print("results", results)
+    #print("Positive_and_negative_list",Positive_and_negative_list)
+    print("------")
+    # middle2=[]
+    # middle3=[]
+    # for i in range(middle.__len__()):
+    #     if(middle[i][0]==''):
+    #         break
+    #     else:
+    #         middle2.append(middle[i])
+    #         middle3.append(middle[i])
+    #     #print(middle[i])
+    # #print(middle2)
+    #
+    # middle3 = copy.deepcopy(middle2)
+    #
+    # cnt1=0
+    # for exp in middle2:
+    #     print(exp)
+    #     cnt2=0
+    #     for item in exp:
+    #
+    #         if(item==''):#空项
+    #             break
+    #         if(isNumber(item)):#一项
+    #             continue
+    #         elif(item in Var_list):#一项
+    #             continue
+    #         elif(item in Const_list):#一项
+    #             print("t" + str(nT)+" = "+item)
+    #             middle3[cnt1][cnt2]="t" + str(nT)
+    #             nT += 1
+    #             continue
+    #         print("t" + str(nT))
+    #         cnt2 += 1
+    #     cnt1+=1
+    #
+    # print(middle2)
+    # print(middle3)
+    #middle_bak = copy.deepcopy(middle)
+    #middle2 = copy.deepcopy(middle)
+    print("=================")
+    LL = 0
+    for a in range(middle.__len__()):
+        exp=middle[a]
+        for b in range(exp.__len__()):
+            item_or_plus = exp[b]
+            if(type(item_or_plus) == type([])):#item
+                #print(item_or_plus)
+
+                for c in range(item_or_plus.__len__()):
+                    factor_or_mul = item_or_plus[c]
+                    #print(factor_or_mul)
+                    if factor_or_mul in Var_list or isNumber(factor_or_mul) or factor_or_mul[0]=='t':
+                        continue
+                    elif factor_or_mul in Const_list:
+                        results.append("t"+str(nT)+" = "+factor_or_mul)
+                        item_or_plus[c]="t"+str(nT)
+                        #print("item_or_plus[c]"+factor_or_mul)
+                        nT+=1
+                    elif(factor_or_mul)=='*':  #归约
+                        last_f_or_mul = item_or_plus[c - 1]
+                        # print("last"+last_f_or_mul)
+                        next_f_or_mul = item_or_plus[c + 1]
+                        # print("next"+next_f_or_mul)
+                        results.append("t" + str(nT) + " = " + last_f_or_mul +" * "+ next_f_or_mul)
+                        item_or_plus[c+1]="t"+str(nT)
+                        nT += 1
+                exp[b]=item_or_plus[-1]
+            item_or_plus=exp[b]
+            #print(item_or_plus+"................")
+        for b in range(exp.__len__()):
+            item_or_plus = exp[b]
+            if item_or_plus in Var_list or isNumber(item_or_plus) or item_or_plus[0] == 't':
+                continue
+            elif item_or_plus in Const_list:
+                results.append("t" + str(nT) + " = " + item_or_plus)
+                exp[b] = "t" + str(nT)
+                # print("item_or_plus[c]"+factor_or_mul)
+                nT += 1
+            elif (item_or_plus) == '+':  # 归约
+                last_item_or_plus = exp[b - 1]
+                # print("last"+last_f_or_mul)
+                next_item_or_plus = exp[b + 1]
+                # print("next"+next_f_or_mul)
+                results.append("t" + str(nT) + " = " + last_item_or_plus + " + " + next_item_or_plus)
+                exp[b + 1] = "t" + str(nT)
+                nT += 1
+            elif (item_or_plus) == '-':  # 归约
+                last_item_or_plus = exp[b - 1]
+                # print("last"+last_f_or_mul)
+                next_item_or_plus = exp[b + 1]
+                # print("next"+next_f_or_mul)
+                results.append("t" + str(nT) + " = " + last_item_or_plus + " - " + next_item_or_plus)
+                exp[b + 1] = "t" + str(nT)
+                nT += 1
+        middle[a] = exp[-1]
+        results.append(left_list[LL]+ " = "+"t" + str(nT-1))
+        LL+=1
+
+                #item_or_plus=
+            # elif (item_or_plus == '+'):        #plus 归约
+            #     #sult('+')
+            #     continue
+            # elif (item_or_plus == '-'):       #plus 归约
+            #     #sult('-')
+            #     continue
+
+    print("=================")
+    print("middle")
+    for i in middle:
+        print(i)
+    print("results")
+    for i in results:
+        print(i)
+
+    # a=0
+    # for exp in middle:
+    #     print(exp)
+    #     b=0
+    #     for item_or_plus in exp:
+    #
+    #
+    #         b+=1
+    #
+    #     a+=1
+    #
+    # print("=================")
+    # print(results)

@@ -68,6 +68,7 @@ def lexer():
             if isNumber(ch) == False:
                 break
             sum = sum * 10 + int(ch)
+            #token = str(sum)
             ch = program[p]
             p = p + 1
 
