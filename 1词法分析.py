@@ -19,7 +19,7 @@ def isAlpha(ch):
     return (ch >= 'a' and ch <= 'z' or ch >= 'A' and ch <= 'Z')
 
 
-def Print(syn):
+def PrintSyn(syn):
     if syn == 11:
         print(syn, sum, sep=",")
     else:
@@ -68,6 +68,7 @@ def lexer():
             if isNumber(ch) == False:
                 break
             sum = sum * 10 + int(ch)
+            #token = str(sum)
             ch = program[p]
             p = p + 1
 
@@ -150,5 +151,5 @@ if __name__ == "__main__":
             print("success")
             break
         else:
-            Print(syn)
+            PrintSyn(syn)
 

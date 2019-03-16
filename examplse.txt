@@ -6,7 +6,7 @@ begin
     if a>0
        then
        begin
-         c=y -1;
+         c=y -;
          a=a+2;
        end
     else
