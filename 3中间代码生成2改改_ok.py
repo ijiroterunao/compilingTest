@@ -1,5 +1,4 @@
 # -*- coding: UTF-8 -*-
-import copy
 import os
 import sys
 
@@ -282,7 +281,6 @@ def Var_Description():  # <变量说明>→Var <标识符>{，<标识符>}；
 def Var_Define():  # <标识符>→<字母>{<字母>|<数字>}
     global p, m, token, ch, syn, sum, offset, LL, nT, middle,Var_list
     if syntax == 10:
-
         printOffset()
         print("<变量定义>", token)
         return True
@@ -320,7 +318,6 @@ def Assignment_Stmt():  # <赋值语句>→<标识符>＝<表达式>;
     offset += 4
     printOffset()
     print("<标识符>", token)
-
     lexer() #识别赋值语句的等号
     if (syntax == 16):  # 等于号
         middle.append([])
@@ -438,7 +435,6 @@ def Item():  # <项>→<因子>{<乘法运算符><因子>}
     print("<项>")
     offset += 4
     middle[LL].append([])
-
     while True:
         if Factor() == False:
             break
@@ -446,7 +442,6 @@ def Item():  # <项>→<因子>{<乘法运算符><因子>}
             printOffset()
             print("<乘法运算符>", token)
             middle[LL][-1].append(token)
-            #middle[LL][LR]=middle[LL][LR]+token
             lexer()
         else:
             LR += 1
@@ -518,7 +513,7 @@ def Condition(): #<条件>→<表达式><关系运算符><表达式>
 if __name__ == "__main__":
     program = open('examplse2.txt').read()
     sys.stderr = open('err.log', 'w')
-    sys.stdout = open('file_out.txt', 'w')
+    #sys.stdout = open('file_out.txt', 'w')
     print("源程序：")
     print(program)
     p = 0
@@ -613,6 +608,7 @@ if __name__ == "__main__":
                 exp[b]=item_or_plus[-1]
             item_or_plus=exp[b]
             #print(item_or_plus+"................")
+        print(exp)
         for b in range(exp.__len__()):
             item_or_plus = exp[b]
             if item_or_plus in Var_list or isNumber(item_or_plus) or item_or_plus[0] == 't':
@@ -654,6 +650,7 @@ if __name__ == "__main__":
     print("middle")
     for i in middle:
         print(i)
+    print("=================")
     print("results")
     for i in results:
         print(i)

@@ -107,6 +107,7 @@ def lexer():
             if isNumber(ch) == False:
                 break
             sum = sum * 10 + int(ch)
+            token = str(sum)
             ch = program[p]
             p = p + 1
 
@@ -286,7 +287,7 @@ def Assignment_Stmt():  # <赋值语句>→<标识符>＝<表达式>;
     offset += 4
     printOffset()
     print("<标识符>", token)
-    lexer()
+    lexer() #识别赋值语句的等号
     if (syntax == 16):  # 等于号
         printOffset()
         print("赋值语句的等于 =")

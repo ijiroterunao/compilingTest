@@ -1,8 +1,8 @@
 Const x=8,y=7;
 Var a,b,c;
 begin
-   a=2*x;
-   b=a+x+y;
+   a=1+2*3*4*x-y;
+   b=a*1+x-y;
    c=a+3*b;
 end
 #
